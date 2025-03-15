@@ -2,19 +2,20 @@
 Baseline for https://github.com/pharo-graphics/Roassal
 "
 Class {
-	#name : #BaselineOfRoassal,
-	#superclass : #BaselineOf,
-	#category : #BaselineOfRoassal
+	#name : 'BaselineOfRoassal',
+	#superclass : 'BaselineOf',
+	#category : 'BaselineOfRoassal',
+	#package : 'BaselineOfRoassal'
 }
 
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> aiDatasets: spec [
 	spec 
    		baseline: 'AIDatasets' 
    		with: [ spec repository: 'github://pharo-ai/datasets' ]
 ]
 
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> athensSVG: spec [
 	spec baseline: 'AthensSVG' with: [
 		spec repository: 'github://pharo-contributions/Athens-SVG/src' ].
@@ -22,91 +23,86 @@ BaselineOfRoassal >> athensSVG: spec [
 		spec repository: 'github://pharo-contributions/Athens-SVG/src'].
 ]
 
-{ #category : #baselines }
+{ #category : 'baselines' }
 BaselineOfRoassal >> baseline: spec [
-	<baseline>
 	"https://github.com/pharo-graphics/Roassal"
+
 	"pharo7 not supported"
-	spec 
-		for: #'pharo8.x' do: [ self baselineForPharo8: spec ];
-		for: #'pharo9.x' do: [ self baselineForPharo9: spec ];
-		for: #'pharo10.x' do: [ self baselineForPharo10: spec ];
-		for: #'pharo11.x' do: [ self baselineForPharo11: spec ];
-		for: #'pharo12.x' do: [ self baselineForPharo12: spec ];
-		for: #'common' do: [ self baselineForCommon: spec ].
+
+	<baseline>
+	self baselineOfCommon: spec.
+
+	spec
+		for: #( #'pharo8.x' #'pharo9.x' #'pharo10.x' #'pharo11.x' ) do: [
+			spec package: #'Roassal-Pharo'.
+			spec group: 'Core' with: #( 'Roassal-Pharo' ) ];
+		for: #'pharo8.x' do: [
+			spec package: #'Roassal-Pharo8'.
+			spec package: #'Roassal-Spec-Obsolete'.
+			spec group: 'Core' with: #( 'Roassal-Pharo8' 'Roassal-Spec-Obsolete' ) ];
+		for: #'pharo9.x' do: [
+			spec package: #'Roassal-Pharo9'.
+			spec group: 'Core' with: #( 'Roassal-Pharo9' ) ];
+		for: #'pharo10.x' do: [
+			spec package: #'Roassal-Pharo10'.
+			spec group: 'Core' with: #( 'Roassal-Pharo10' ) ];
+		for: #'pharo12.x' do: [
+			spec package: #'Roassal-Pharo12'.
+			spec group: 'Core' with: #( 'Roassal-Pharo12' ) ]
 ]
 
-{ #category : #baselines }
-BaselineOfRoassal >> baselineForCommon: spec [
-	self baselineForPharo11: spec
+{ #category : 'baselines' }
+BaselineOfRoassal >> baselineOfCommon: spec [
+
+	spec for: #common do: [
+		self
+			bloc: spec;
+			athensSVG: spec;
+			geometry: spec;
+			numeric: spec;
+			subProcess: spec;
+			dataFrame: spec;
+			aiDatasets: spec;
+			layouts: spec;
+			rtree: spec.
+
+		spec package: #Roassal with: [ spec requires: #( 'Geometry' 'NumericScales' 'RoassalLayouts' 'RTree' ) ].
+
+		self corePackagesNames , self examplePackagesNames , self testPackagesNames , self extraPackagesNames do: [ :name | spec package: name ].
+
+		spec
+			package: #'Roassal-Bloc' with: [ spec requires: #( 'Bloc' ) ];
+			package: #'Roassal-SVG' with: [ spec requires: #( 'Athens-SVG-PathConverter' ) ];
+			package: #'Roassal-SVG-Tests';
+			package: #'Roassal-SVG-Examples';
+			package: #'Roassal-SVG-Importer' with: [ spec requires: #( 'AthensSVG' ) ];
+			package: #'Roassal-GraphViz' with: [ spec requires: #( 'OSSubprocess' ) ];
+			package: #'Roassal-Gtk';
+			package: #'Roassal-Spec-Gtk';
+			package: #'Roassal-Chart-DataFrame' with: [ spec requires: #( 'DataFrame' 'AIDatasets' ) ].
+
+		spec
+			group: 'Core' with: #( 'Roassal' ) , self corePackagesNames;
+			group: 'Examples' with: #( 'Core' ) , self examplePackagesNames;
+			group: 'Tests' with: #( 'Core' ) , self testPackagesNames;
+			group: 'SVGExamples' with: #( 'Examples' 'Roassal-SVG-Examples' );
+			group: 'SVGImporter' with: #( 'SVGExamples' 'Roassal-SVG-Importer' );
+			group: 'Gtk' with: #( 'Roassal-Gtk' 'Roassal-Spec-Gtk' );
+			group: 'Mini' with: #( 'Tests' 'SVGExamples' );
+			group: 'Full' with: #( 'Mini' ) , self extraPackagesNames;
+			group: 'GraphViz' with: #( 'Full' 'Roassal-GraphViz' );
+			group: 'BlocFull' with: #( 'Full' 'Roassal-Bloc' );
+			group: 'default' with: #( 'Mini' );
+			group: 'Full-DataFrame' with: #( 'Full' 'Roassal-Chart-DataFrame' ) ]
 ]
 
-{ #category : #baselines }
-BaselineOfRoassal >> baselineForPharo10: spec [
-	self dependencies: spec.
-	self registerPackages: spec.
-	spec package: #'Roassal-Pharo'.
-	spec package: #'Roassal-Pharo10'.
-	self roassalGroups: spec 
-		core: self corePackagesNames, #('Roassal-Pharo' 'Roassal-Pharo10')
-		examples: self examplePackagesNames
-		tests: self testPackagesNames.
-]
-
-{ #category : #baselines }
-BaselineOfRoassal >> baselineForPharo11: spec [
-	self dependencies: spec.
-	self registerPackages: spec.
-	spec package: #'Roassal-Pharo'.
-	self roassalGroups: spec 
-		core: self corePackagesNames, #('Roassal-Pharo')
-		examples: self examplePackagesNames
-		tests: self testPackagesNames.
-]
-
-{ #category : #baselines }
-BaselineOfRoassal >> baselineForPharo12: spec [
-	self dependencies: spec.
-	self registerPackages: spec.
-	spec package: #'Roassal-Pharo12'.
-	self roassalGroups: spec 
-		core: self corePackagesNames, #('Roassal-Pharo12')
-		examples: self examplePackagesNames
-		tests: self testPackagesNames.
-]
-
-{ #category : #baselines }
-BaselineOfRoassal >> baselineForPharo8: spec [
-	self dependencies: spec.
-	self registerPackages: spec.
-	spec package: #'Roassal-Pharo8'.
-	spec package: #'Roassal-Spec-Obsolete'.
-	spec package: #'Roassal-Pharo'.
-	self roassalGroups: spec 
-		core: self corePackagesNames, #('Roassal-Pharo8' 'Roassal-Spec-Obsolete' 'Roassal-Pharo')
-		examples: self examplePackagesNames
-		tests: self testPackagesNames.
-]
-
-{ #category : #baselines }
-BaselineOfRoassal >> baselineForPharo9: spec [
-	self dependencies: spec.
-	self registerPackages: spec.
-	spec package: #'Roassal-Pharo9'.
-	spec package: #'Roassal-Pharo'.
-	self roassalGroups: spec 
-		core: self corePackagesNames, #('Roassal-Pharo9' 'Roassal-Pharo')
-		examples: self examplePackagesNames
-		tests: self testPackagesNames.
-]
-
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> bloc: spec [
 	spec baseline: 'Bloc' with: [
 		spec repository: 'github://pharo-graphics/Bloc:dev-1.0/src' ]
 ]
 
-{ #category : #'API-packages' }
+{ #category : 'API-packages' }
 BaselineOfRoassal >> corePackagesNames [
 	^ #(
 	'Roassal-Event'
@@ -133,28 +129,14 @@ BaselineOfRoassal >> corePackagesNames [
 	)
 ]
 
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> dataFrame: spec [
 	spec 
 		baseline: 'DataFrame'
 		with: [ spec repository: 'github://PolyMathOrg/DataFrame/src' ]
 ]
 
-{ #category : #dependencies }
-BaselineOfRoassal >> dependencies: spec [
-	self 
-		bloc: spec;
-		athensSVG: spec;
-		geometry: spec;
-		numeric: spec;
-		subProcess: spec;
-		dataFrame: spec;
-		aiDatasets: spec;
-		layouts: spec;
-		rtree: spec
-]
-
-{ #category : #'API-packages' }
+{ #category : 'API-packages' }
 BaselineOfRoassal >> examplePackagesNames [
 	^ #(
 	'Roassal-Examples'
@@ -167,7 +149,7 @@ BaselineOfRoassal >> examplePackagesNames [
 	'Roassal-Spec-Examples')
 ]
 
-{ #category : #'API-packages' }
+{ #category : 'API-packages' }
 BaselineOfRoassal >> extraPackagesNames [
 	^ #(
 	'Roassal-Experimental'
@@ -178,96 +160,40 @@ BaselineOfRoassal >> extraPackagesNames [
 	'Roassal-TreeMap-Examples')
 ]
 
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> geometry: spec [
 	spec baseline: 'Geometry' with: [ 
 		spec repository: 'github://pharo-contributions/Geometry/src' ]
 ]
 
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> layouts: spec [
 	spec
 		baseline: 'RoassalLayouts'
 		with: [ spec repository: 'github://pharo-graphics/RoassalLayouts:v1.01/src' ]
 ]
 
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> numeric: spec [
 	spec baseline: 'NumericScales'with: [ 
 		spec repository: 'github://pharo-graphics/NumericScales:v1.03/src' ].
 ]
 
-{ #category : #baselines }
-BaselineOfRoassal >> registerPackages: spec [
-	"The packages to use, but not load"
-	spec package: #'Roassal' with: [ 
-		spec requires: 
-			#('Geometry'
-			'NumericScales'
-			'RoassalLayouts'
-			'RTree') ].
-	self corePackagesNames, 
-	self examplePackagesNames, 
-	self testPackagesNames, 
-	self extraPackagesNames do: [ :name | spec package: name ].
-	
-	spec		
-		package: #'Roassal-Bloc' with: [ spec requires: #('Bloc') ];
-
-		package: #'Roassal-SVG' with: [ spec requires: #('Athens-SVG-PathConverter') ];
-		package: #'Roassal-SVG-Tests';
-		package: #'Roassal-SVG-Examples';
-		package: #'Roassal-SVG-Importer' with: [ spec requires: #('AthensSVG') ].
-		
-	spec package: #'Roassal-GraphViz' with: [ spec requires: #('OSSubprocess') ].
-	
-	spec package: #'Roassal-Gtk'.
-	spec package: #'Roassal-Spec-Gtk'.
-
-	spec package: #'Roassal-Chart-DataFrame' with: [ spec requires: #('DataFrame' 'AIDatasets') ].
-
-
-
-
-
-
-]
-
-{ #category : #baselines }
-BaselineOfRoassal >> roassalGroups: spec core: arr1 examples: arr2 tests: arr3 [
-	| core |
-	core := #('Core').
-	spec
-		group: 'Core' with: #('Roassal'), arr1;
-		group: 'Examples' with: core, arr2;
-		group: 'Tests' with: core, arr3;
-		group: 'SVGExamples' with: #('Examples' 'Roassal-SVG-Examples');
-		group: 'SVGImporter' with: #('SVGExamples' 'Roassal-SVG-Importer');
-		group: 'Gtk' with: #('Roassal-Gtk' 'Roassal-Spec-Gtk');
-
-		group: 'Mini' with: #('Tests' 'SVGExamples');
-		group: 'Full' with: #('Mini'), self extraPackagesNames;
-		group: 'GraphViz' with: #('Full' 'Roassal-GraphViz');
-		group: 'BlocFull' with: #('Full' 'Roassal-Bloc');
-		group: 'default' with: #('Mini');
-		group: 'Full-DataFrame' with: #('Full' 'Roassal-Chart-DataFrame')
-]
-
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> rtree: spec [
 	spec
 		baseline: 'RTree'
 		with: [ spec repository: 'github://pharo-graphics/RTree:v1.01/src' ]
 ]
 
-{ #category : #dependencies }
+{ #category : 'dependencies' }
 BaselineOfRoassal >> subProcess: spec [
 	spec
 		baseline: 'OSSubprocess'
 		with: [ spec repository: 'github://pharo-contributions/OSSubprocess/repository' ]
 ]
 
-{ #category : #'API-packages' }
+{ #category : 'API-packages' }
 BaselineOfRoassal >> testPackagesNames [
 	^ #(
 	'Roassal-Global-Tests'
